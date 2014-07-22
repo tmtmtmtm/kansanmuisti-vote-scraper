@@ -55,15 +55,15 @@ plenary_sessions_with_votes.each do |session|
 
     ScraperWiki.save_sqlite(['voteid'], data)
 
-    plenary_vote['roll_call'].each do |pv|
-      rcv = {
+    rcvs = plenary_vote['roll_call'].map { |pv|
+      {
         'voteid' => plenary_vote['id'],
         'voter' => pv['member'][/member\/(\d+)/,1],
         'option' => vote_option(pv['vote']),
         'grouping' => pv['party'],
       }
-      ScraperWiki.save_sqlite(['voteid','voter'], rcv, 'vote')
-    end
+    }
+    ScraperWiki.save_sqlite(['voteid','voter'], rcvs, 'vote')
   end
 end
 
