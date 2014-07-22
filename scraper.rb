@@ -12,7 +12,7 @@ def api_fetch (str)
 end
 
 def plenary_sessions_with_votes
-  api_fetch("/plenary_session/?limit=30")['objects'].reject { |s| s['plenary_votes'].count.zero? }
+  api_fetch("/plenary_session/?limit=100")['objects'].reject { |s| s['plenary_votes'].count.zero? }
 end
 
 def plenary_session_item (uri)
