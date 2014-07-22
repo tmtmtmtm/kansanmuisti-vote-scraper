@@ -12,7 +12,7 @@ def api_fetch (str)
 end
 
 def plenary_sessions_with_votes
-  api_fetch("/plenary_session/")['objects'].reject { |s| s['plenary_votes'].count.zero? }
+  api_fetch("/plenary_session/?limit=30")['objects'].reject { |s| s['plenary_votes'].count.zero? }
 end
 
 def plenary_session_item (uri)
@@ -24,8 +24,7 @@ def rollcall (pvid)
   api_fetch("/vote/?limit=200&plenary_vote=#{pvid}")['objects']
 end
 
-def plenary_vote (uri)
-  id = uri[/plenary_vote\/(\d+)/,1]
+def plenary_vote (id)
   pv = api_fetch("/plenary_vote/#{id}")
   pv['session_item'] = plenary_session_item(pv['session_item'])
   pv['roll_call'] = rollcall(id)
@@ -41,8 +40,15 @@ def vote_option (str)
 end
 
 plenary_sessions_with_votes.each do |session|
-  session['plenary_votes'].map { |uri| plenary_vote(uri) }.each do |plenary_vote|
-  
+  session['plenary_votes'].each do |pvuri| 
+    pvid = pvuri[/plenary_vote\/(\d+)/,1]
+
+    unless (ScraperWiki.select('* FROM data WHERE voteid=?', pvid.to_i).empty? rescue true) 
+      puts "Skipping #{pvid}"
+      next
+    end
+
+    plenary_vote = plenary_vote(pvid) 
     data = {
       'voteid' => plenary_vote['id'],
       'time' => plenary_vote['time'],
